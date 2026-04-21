@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>KDS Cocina</title>
+    <link rel="stylesheet" href="style.css"> <!-- Reutilizamos estilos -->
+    <style>
+        body { background: #000; color: #fff; padding: 20px; }
+        #board { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .card { background: #1c1c1e; padding: 15px; border-radius: 15px; border-top: 6px solid #30d158; }
+        .card.aviso { border-top-color: #ff9f0a; }
+        .card.critico { border-top-color: #ff453a; }
+        .timer { font-size: 24px; font-weight: bold; margin-top: 10px; }
+        .btn-listo { width: 100%; padding: 15px; background: #30d158; border: none; color: white; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>COCINA</h1>
+    <div id="board"></div>
+    <script>
+        const URL = "https://TU-PROYECTO.firebaseio.com/pedidos";
+        let pedidos = {};
+
+        async function sync() {
+            const res = await fetch(URL + ".json");
+            pedidos = await res.json() || {};
+            render();
+        }
+
+        function render() {
+            const b = document.getElementById('board'); b.innerHTML = "";
+            for (let id in pedidos) {
+                if (pedidos[id].status !== "preparando") continue;
+                const p = pedidos[id];
+                const trans = Math.floor((Date.now() - p.timestamp) / 1000);
+                const card = document.createElement('div');
+                card.className = `card ${trans > 600 ? 'critico' : trans > 300 ? 'aviso' : ''}`;
+                card.innerHTML = `<strong>${p.id}</strong><div style="font-size:18px; margin:10px 0">${p.items.join('<br>')}</div><div class="timer">${Math.floor(trans/60)}:${(trans%60).toString().padStart(2,'0')}</div><button class="btn-listo" onclick="listo('${id}')">LISTO</button>`;
+                b.appendChild(card);
+            }
+        }
+
+        async function listo(id) {
+            await fetch(`${URL}/${id}/status.json`, { method: 'PUT', body: JSON.stringify("listo") });
+            sync();
+        }
+
+        setInterval(sync, 4000); sync();
+    </script>
+</body>
+</html>

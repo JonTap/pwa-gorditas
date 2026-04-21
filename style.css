@@ -1,0 +1,275 @@
+/* --- 1. VARIABLES Y MODO OSCURO --- */
+:root {
+    --system-bg: #F2F2F7;
+    --item-bg: #FFFFFF;
+    --accent: #007AFF;
+    --text-main: #000000;
+    --text-sec: #8E8E93;
+    --separator: #C6C6C8;
+    --search-bg: #E3E3E6;
+    --ok: #30D158;
+    --warn: #FF9F0A;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --system-bg: #000000;
+        --item-bg: #1C1C1E;
+        --accent: #0A84FF;
+        --text-main: #FFFFFF;
+        --separator: #38383A;
+        --search-bg: #1C1C1E;
+    }
+}
+
+/* --- 2. BASE --- */
+body {
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+    background-color: var(--system-bg);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0 0 140px 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- 3. TRACKING BAR --- */
+.tracking-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 12px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--warn);
+    color: white;
+    transition: background 0.5s ease;
+}
+.tracking-ready { background: var(--ok) !important; }
+
+/* --- 4. HEADER & SEARCH --- */
+header {
+    padding: 30px 20px 10px 20px;
+    background: var(--system-bg);
+    position: sticky;
+    top: 0; /* Si el tracking bar está oculto, se pega arriba */
+    z-index: 20;
+}
+
+h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.mesa-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.mesa-tag {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.btn-lock {
+    background: var(--search-bg);
+    border: none;
+    color: var(--text-sec);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#searchBar {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--search-bg);
+    color: var(--text-main);
+    margin-top: 15px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 16px;
+}
+
+/* --- 5. CATEGORY NAV --- */
+.cat-nav {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px;
+    overflow-x: auto;
+    position: sticky;
+    top: 155px; /* Ajustado para quedar bajo buscador */
+    background: var(--system-bg);
+    z-index: 15;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.cat-nav::-webkit-scrollbar { display: none; }
+
+.cat-nav button {
+    background: var(--item-bg);
+    border: 0.5px solid var(--separator);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+/* --- 6. PICKER (SEGMENTED CONTROL) --- */
+.picker {
+    background: var(--search-bg);
+    border-radius: 12px;
+    display: flex;
+    margin: 15px 20px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.picker label { flex: 1; cursor: pointer; }
+.picker input { display: none; }
+
+.picker span {
+    display: block;
+    text-align: center;
+    padding: 7px 0;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.picker input:checked + span {
+    background: var(--accent);
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0, 122, 255, 0.3);
+}
+
+/* --- 7. INPUT CLIENTE --- */
+#cliente-input-container {
+    display: none;
+    margin: 0 20px 15px 20px;
+}
+
+#clienteNombre {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--separator);
+    background: var(--item-bg);
+    color: var(--text-main);
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* --- 8. LISTAS Y PRODUCTOS --- */
+h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-sec);
+    margin: 25px 20px 8px 35px;
+    font-weight: 400;
+}
+
+.list-group {
+    background: var(--item-bg);
+    border-radius: 12px;
+    margin: 0 20px;
+    overflow: hidden;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+.item:last-child { border-bottom: none; }
+
+.item-name {
+    flex: 1;
+    font-size: 17px;
+    letter-spacing: -0.3px;
+}
+
+/* --- 9. STEPPER --- */
+.stepper {
+    display: flex;
+    align-items: center;
+    background: var(--system-bg);
+    border-radius: 10px;
+    padding: 2px;
+}
+
+.stepper button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stepper span {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* --- 10. FOOTER BAR --- */
+.footer-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--footer-bg, rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-top: 0.5px solid var(--separator);
+    padding: 15px 20px 35px 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 30;
+}
+
+@media (prefers-color-scheme: dark) {
+    .footer-bar { background: rgba(28, 28, 30, 0.85); }
+}
+
+.total-price {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.btn-send {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    transition: transform 0.1s active;
+}
+
+.btn-send:active { transform: scale(0.96); }

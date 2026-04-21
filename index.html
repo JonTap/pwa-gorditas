@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menú El Sazón</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="color-scheme" content="light dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<!-- Barra de Seguimiento (Tracking) -->
+<div id="tracking-bar" class="tracking-bar" style="display:none;">
+    <span id="tracking-status">⏳ Tu pedido se está preparando...</span>
+</div>
+
+<header>
+    <h1>El Sazón</h1>
+    <div class="mesa-row">
+        <div class="mesa-tag" id="mesa-label">Cargando...</div>
+        <button class="btn-lock" onclick="solicitarCambioMesa()">🔒 CAMBIAR MESA</button>
+    </div>
+    <div class="search-box">
+        <input type="text" id="searchBar" placeholder="🔍 Buscar platillo..." onkeyup="filterItems()">
+    </div>
+</header>
+
+<nav class="cat-nav">
+    <button onclick="jumpTo('sec-gorditas')">Gorditas</button>
+    <button onclick="jumpTo('sec-bebidas')">Bebidas</button>
+</nav>
+
+<div class="picker">
+    <label><input type="radio" name="via" value="Aquí" checked onclick="manejarTipoEntrega()"><span>Comer Aquí</span></label>
+    <label><input type="radio" name="via" value="Llevar" onclick="manejarTipoEntrega()"><span>Para Llevar</span></label>
+</div>
+
+<div id="cliente-input-container">
+    <input type="text" id="clienteNombre" placeholder="👤 ¿A nombre de quién?">
+</div>
+
+<div id="menu-content"></div>
+
+<div class="footer-bar">
+    <div class="total-info">
+        <span class="total-label">Total estimado</span>
+        <span class="total-price" id="total-val">$0</span>
+    </div>
+    <button class="btn-send" onclick="sendOrder()">Enviar Pedido 🛒</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

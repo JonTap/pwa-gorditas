@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Caja</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding: 20px;">
+    <h1>CAJA</h1>
+    <div id="lista-caja"></div>
+    <script>
+        const URL = "https://TU-PROYECTO.firebaseio.com/pedidos";
+        async function sync() {
+            const res = await fetch(URL + ".json");
+            const data = await res.json() || {};
+            const cont = document.getElementById('lista-caja'); cont.innerHTML = "";
+            for (let id in data) {
+                const p = data[id];
+                cont.innerHTML += `<div class="item" style="background:white; margin-bottom:10px; border-radius:10px; padding:15px; justify-content:space-between"><div><strong>${p.id}</strong> (${p.status})</div><button onclick="cobrar('${id}')" style="background:#007aff; color:white; border:none; padding:10px; border-radius:8px">PAGADO</button></div>`;
+            }
+        }
+        async function cobrar(id) {
+            if(confirm("¿Pedido entregado y cobrado?")) {
+                await fetch(`${URL}/${id}.json`, { method: 'DELETE' }); sync();
+            }
+        }
+        setInterval(sync, 5000); sync();
+    </script>
+</body>
+</html>

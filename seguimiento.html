@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seguimiento TV</title>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; display: flex; height: 100vh; margin: 0; text-align: center; }
+        .col { flex: 1; border-right: 2px solid #1c1c1e; padding: 20px; }
+        h2 { font-size: 30px; color: #8e8e93; border-bottom: 2px solid #38383a; padding-bottom: 20px; }
+        .num { font-size: 80px; font-weight: bold; margin: 20px 0; }
+        .pre { color: #ff9f0a; } .lis { color: #30d158; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="col"><h2>PREPARANDO</h2><div id="col-pre" class="pre"></div></div>
+    <div class="col"><h2>LISTOS</h2><div id="col-lis" class="lis"></div></div>
+    <audio id="snd" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+    <script>
+        const URL = "https://TU-PROYECTO.firebaseio.com/pedidos.json";
+        let memoria = {};
+        async function sync() {
+            const res = await fetch(URL); const data = await res.json() || {};
+            const pre = document.getElementById('col-pre'), lis = document.getElementById('col-lis');
+            pre.innerHTML = ""; lis.innerHTML = "";
+            for (let id in data) {
+                const p = data[id]; const div = `<div class="num">${p.id.replace("Mesa ","")}</div>`;
+                if (p.status === "listo") {
+                    lis.innerHTML += div;
+                    if (memoria[id] === "preparando") document.getElementById('snd').play();
+                } else { pre.innerHTML += div; }
+                memoria[id] = p.status;
+            }
+        }
+        window.onclick = () => { document.getElementById('snd').play(); console.log("Audio On"); };
+        setInterval(sync, 3000);
+    </script>
+</body>
+</html>
