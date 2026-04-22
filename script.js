@@ -1,6 +1,6 @@
 const CONFIG = {
-    tel: "521234567890", 
-    pGordita: 25, pBebida: 20, SECRET: 15, STAFF_PIN: "2024",
+    tel: "524891090228", 
+    pGordita: 25, pBebida: 20, SECRET: 15, STAFF_PIN: "3026",
     FIREBASE_URL: "https://pwa-4e890-default-rtdb.firebaseio.com
 "
 };
