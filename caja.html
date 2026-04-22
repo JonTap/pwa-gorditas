@@ -32,8 +32,16 @@
             }
         }
         async function cobrar(id) {
-            if(confirm("¿Pedido entregado y cobrado?")) {
-                await fetch(`${URL}/${id}.json`, { method: 'DELETE' }); sync();
+            if(confirm("¿Confirmar pago y entrega?")) {
+                const final = {
+                    status: "completado",
+                    finalTimestamp: Date.now() // Para contabilidad
+                };
+                await fetch(`https://pwa-4e890-default-rtdb.firebaseio.com/pedidos/${id}.json`, { 
+                    method: 'PATCH', 
+                    body: JSON.stringify(final) 
+                });
+                sync();
             }
         }
         setInterval(sync, 5000); sync();
