@@ -1,40 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Seguimiento TV</title>
+    <meta charset="UTF-8">
+    <title>Pantalla de Seguimiento - El Sazón</title>
     <style>
-        body { font-family: sans-serif; background: #000; color: #fff; display: flex; height: 100vh; margin: 0; text-align: center; }
-        .col { flex: 1; border-right: 2px solid #1c1c1e; padding: 20px; }
-        h2 { font-size: 30px; color: #8e8e93; border-bottom: 2px solid #38383a; padding-bottom: 20px; }
-        .num { font-size: 80px; font-weight: bold; margin: 20px 0; }
-        .pre { color: #ff9f0a; } .lis { color: #30d158; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        :root {
+            --bg: #000000;
+            --card-bg: #1C1C1E;
+            --text-main: #FFFFFF;
+            --text-sec: #8E8E93;
+            --prep: #FF9F0A; /* Naranja Apple */
+            --ready: #30D158; /* Verde Apple */
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+
+        .column:last-child { border-right: none; }
+
+        h2 {
+            text-align: center;
+            font-size: 2rem;
+            padding: 20px;
+            margin: 0;
+            background: rgba(255,255,255,0.05);
+            letter-spacing: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            align-content: start;
+        }
+
+        /* TARJETAS DE ORDEN */
+        .order-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .order-id {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .order-meta {
+            font-size: 1.2rem;
+            color: var(--text-sec);
+            margin-top: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ESTADOS */
+        .col-prep h2 { color: var(--prep); }
+        .col-prep .order-id { color: var(--prep); }
+
+        .col-ready h2 { color: var(--ready); }
+        .col-ready .order-card { 
+            border: 2px solid var(--ready); 
+            animation: pulse 2s infinite;
+        }
+        .col-ready .order-id { color: var(--ready); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(48, 209, 88, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
+        }
+
+        #audio-ding { display: none; }
     </style>
 </head>
 <body>
-    <div class="col"><h2>PREPARANDO</h2><div id="col-pre" class="pre"></div></div>
-    <div class="col"><h2>LISTOS</h2><div id="col-lis" class="lis"></div></div>
-    <audio id="snd" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
-    <script>
-        const URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos";
-        let memoria = {};
-        async function sync() {
-            const res = await fetch(URL + ".json");
+<header>
+    <h1 style="margin:0; font-size: 1.5rem; color: var(--text-sec);">ORDENES EN TIEMPO REAL</h1>
+</header>
+
+<div class="container">
+    <div class="column col-prep">
+        <h2>EN PREPARACIÓN</h2>
+        <div id="grid-prep" class="grid"></div>
+    </div>
+    <div class="column col-ready">
+        <h2>LISTOS</h2>
+        <div id="grid-ready" class="grid"></div>
+    </div>
+</div>
+
+<audio id="audio-ding" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<script>
+    const FIREBASE_URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos.json";
+    let memoriaEstado = {};
+
+    async function updateTV() {
+        try {
+            const res = await fetch(FIREBASE_URL);
             const data = await res.json() || {};
-            const pre = document.getElementById('col-pre'), lis = document.getElementById('col-lis');
-            pre.innerHTML = ""; lis.innerHTML = "";
-            for (let id in data) {
-                const p = data[id]; const div = `<div class="num">${p.id.replace("Mesa ","")}</div>`;
+            
+            const gridPrep = document.getElementById('grid-prep');
+            const gridReady = document.getElementById('grid-ready');
+            const ding = document.getElementById('audio-ding');
+
+            gridPrep.innerHTML = "";
+            gridReady.innerHTML = "";
+
+            for (let key in data) {
+                const p = data[key];
+                // Extraemos los últimos 4 caracteres del OrderId de 10
+                const shortId = p.orderId ? p.orderId.slice(-4).toUpperCase() : "####";
+                
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.innerHTML = `
+                    <div class="order-id">${shortId}</div>
+                    <div class="order-meta">${p.id}</div>
+                `;
+
                 if (p.status === "listo") {
-                    lis.innerHTML += div;
-                    if (memoria[id] === "preparando") document.getElementById('snd').play();
-                } else { pre.innerHTML += div; }
-                memoria[id] = p.status;
+                    gridReady.appendChild(card);
+                    // Si el estado acaba de cambiar a listo, sonar el ding
+                    if (memoriaEstado[key] === "preparando") {
+                        ding.play().catch(() => {});
+                    }
+                } else {
+                    gridPrep.appendChild(card);
+                }
+
+                // Guardar en memoria para detectar cambios en la siguiente vuelta
+                memoriaEstado[key] = p.status;
             }
+        } catch (e) {
+            console.error("Error en TV:", e);
         }
-        window.onclick = () => { document.getElementById('snd').play(); console.log("Audio On"); };
-        setInterval(sync, 3000);
-    </script>
+    }
+
+    // El navegador requiere una interacción para habilitar el sonido
+    window.onclick = () => {
+        document.getElementById('audio-ding').play();
+        console.log("Sonido habilitado");
+    };
+
+    setInterval(updateTV, 4000);
+    updateTV();
+</script>
 </body>
 </html>
