@@ -133,60 +133,74 @@
 
     async function updateTV() {
         try {
-            const res = await fetch(FIREBASE_URL);
-            const data = await res.json() || {};
+            // 1. ASEGÚRATE de que la URL termine en .json
+            const res = await fetch("https://pwa-4e890-default-rtdb.firebaseio.com/pedidos.json");
+            const data = await res.json();
             
             const gridPrep = document.getElementById('grid-prep');
             const gridReady = document.getElementById('grid-ready');
             const ding = document.getElementById('audio-ding');
-
+    
+            // Limpiar pantallas antes de actualizar
             gridPrep.innerHTML = "";
             gridReady.innerHTML = "";
-
+    
+            if (!data) return; // Si no hay pedidos, salir
+    
             for (let key in data) {
                 const p = data[key];
-                // Extraemos los últimos 4 caracteres del OrderId de 10
-                const shortId = p.orderId ? p.orderId.slice(-4).toUpperCase() : "####";
-                
-                const card = document.createElement('div');
-                card.className = 'order-card';
-                card.innerHTML = `
-                    <div class="order-id">${shortId}</div>
-                    <div class="order-meta">${p.id}</div>
-                `;
-
-                if (p.status === "listo") {
-                    // Calcular cuánto tiempo lleva listo en milisegundos
-                    // Asumiremos que guardaremos el tiempo de "listo" en p.tiempoListo
+    
+                // SEGURIDAD: Si el pedido no tiene estado o ID, ignorarlo para que no rompa el código
+                if (!p.status || !p.id) continue;
+    
+                // 2. FILTRO EXPLÍCITO: Solo mostrar lo que está en preparación o listo
+                if (p.status === "completado") continue; // IGNORAR los ya pagados
+    
+                // Formatear el ID para mostrar (ej: "5" en lugar de "Mesa 5")
+                const displayId = p.id.toString().replace("Mesa ", "").replace("Mesa: ", "");
+                const shortId = p.orderId ? p.orderId.slice(-4).toUpperCase() : "---";
+    
+                if (p.status === "preparando") {
+                    // --- SECCIÓN EN PREPARACIÓN ---
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.innerHTML = `
+                        <div class="order-id">${shortId}</div>
+                        <div class="order-meta">${displayId}</div>
+                    `;
+                    gridPrep.appendChild(card);
+                } 
+                else if (p.status === "listo") {
+                    // --- SECCIÓN LISTOS (Con cronómetro de 5 min) ---
                     const ahora = Date.now();
-                    const tiempoListo = p.readyTimestamp || ahora; 
+                    const tiempoListo = p.readyTimestamp || ahora;
                     const transcurridoS = Math.floor((ahora - tiempoListo) / 1000);
                     const limiteS = 300; // 5 minutos
                     const restanteS = limiteS - transcurridoS;
-                
+    
                     if (restanteS > 0) {
-                        const min = Math.floor(restanteS / 60);
-                        const seg = restanteS % 60;
-                        
                         const card = document.createElement('div');
                         card.className = 'order-card';
                         card.innerHTML = `
                             <div class="order-id">${shortId}</div>
-                            <div class="order-meta">${p.id}</div>
+                            <div class="order-meta">${displayId}</div>
                             <div style="font-size:0.8rem; margin-top:5px; color:#30D158">
-                                Expira en: ${min}:${seg.toString().padStart(2,'0')}
+                                Expira: ${Math.floor(restanteS/60)}:${(restanteS%60).toString().padStart(2,'0')}
                             </div>
                         `;
                         gridReady.appendChild(card);
+    
+                        // Sonido si acaba de pasar a listo
+                        if (memoriaEstado[key] === "preparando") {
+                            ding.play().catch(() => {});
+                        }
                     }
-                    // Si restanteS <= 0, simplemente no se añade al grid, pero sigue en la DB
                 }
-
-                // Guardar en memoria para detectar cambios en la siguiente vuelta
+                // Guardar estado en memoria para el sonido
                 memoriaEstado[key] = p.status;
             }
         } catch (e) {
-            console.error("Error en TV:", e);
+            console.error("Error cargando TV:", e);
         }
     }
 
