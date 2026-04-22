@@ -35,7 +35,17 @@
                 const trans = Math.floor((Date.now() - p.timestamp) / 1000);
                 const card = document.createElement('div');
                 card.className = `card ${trans > 600 ? 'critico' : trans > 300 ? 'aviso' : ''}`;
-                card.innerHTML = `<strong>${p.id}</strong><div style="font-size:18px; margin:10px 0">${p.items.join('<br>')}</div><div class="timer">${Math.floor(trans/60)}:${(trans%60).toString().padStart(2,'0')}</div><button class="btn-listo" onclick="listo('${id}')">LISTO</button>`;
+                
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa">
+                        <span>ID: ${p.orderId}</span> <!-- Mostrar el código de 10 caracteres -->
+                        <span>${p.hora}</span>
+                    </div>
+                    <strong style="font-size:20px">${p.id}</strong>
+                    <div style="font-size:18px; margin:10px 0">${p.items.join('<br>')}</div>
+                    <div class="timer">${Math.floor(trans/60)}:${(trans%60).toString().padStart(2,'0')}</div>
+                    <button class="btn-listo" onclick="listo('${id}')">LISTO</button>
+                `;
                 b.appendChild(card);
             }
         }
