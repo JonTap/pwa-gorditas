@@ -75,7 +75,7 @@ async function sendOrder() {
         }
     } catch (e) { console.error(e); }
 
-    window.location.href = `https://wa.me/${CONFIG.tel}?text=${encodeURIComponent("*NUEVO PEDIDO*\n" + txt + "\n" + idFinal)}`;
+    //window.location.href = `https://wa.me/${CONFIG.tel}?text=${encodeURIComponent("*NUEVO PEDIDO*\n" + txt + "\n" + idFinal)}`;
 }
 
 // Rastreo en Tiempo Real para el Cliente
