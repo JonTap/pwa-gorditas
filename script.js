@@ -1,7 +1,8 @@
 const CONFIG = {
     tel: "521234567890", 
     pGordita: 25, pBebida: 20, SECRET: 15, STAFF_PIN: "2024",
-    FIREBASE_URL: "https://TU-PROYECTO.firebaseio.com/pedidos"
+    FIREBASE_URL: "https://pwa-4e890-default-rtdb.firebaseio.com/
+"
 };
 
 const guisados = ["Chicharrón Prensado", "Deshebrada", "Picadillo", "Nopalitos", "Rajas con Queso", "Frijol con Queso", "Asado de Puerco", "Mole", "Chicharrón de Pella", "Huevo con Chorizo", "Papa con Chorizo", "Carne Deshebrada", "Pollo", "Prensado Rojo", "Chiles Rellenos", "Picadillo Verde", "Bistec", "Cochinita", "Tinga", "Champignones"];
