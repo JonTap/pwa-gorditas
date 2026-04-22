@@ -17,10 +17,11 @@
     <audio id="snd" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
-        const URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos.json";
+        const URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos";
         let memoria = {};
         async function sync() {
-            const res = await fetch(URL); const data = await res.json() || {};
+            const res = await fetch(URL + ".json");
+            const data = await res.json() || {};
             const pre = document.getElementById('col-pre'), lis = document.getElementById('col-lis');
             pre.innerHTML = ""; lis.innerHTML = "";
             for (let id in data) {
