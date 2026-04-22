@@ -156,13 +156,30 @@
                 `;
 
                 if (p.status === "listo") {
-                    gridReady.appendChild(card);
-                    // Si el estado acaba de cambiar a listo, sonar el ding
-                    if (memoriaEstado[key] === "preparando") {
-                        ding.play().catch(() => {});
+                    // Calcular cuánto tiempo lleva listo en milisegundos
+                    // Asumiremos que guardaremos el tiempo de "listo" en p.tiempoListo
+                    const ahora = Date.now();
+                    const tiempoListo = p.readyTimestamp || ahora; 
+                    const transcurridoS = Math.floor((ahora - tiempoListo) / 1000);
+                    const limiteS = 300; // 5 minutos
+                    const restanteS = limiteS - transcurridoS;
+                
+                    if (restanteS > 0) {
+                        const min = Math.floor(restanteS / 60);
+                        const seg = restanteS % 60;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'order-card';
+                        card.innerHTML = `
+                            <div class="order-id">${shortId}</div>
+                            <div class="order-meta">${p.id}</div>
+                            <div style="font-size:0.8rem; margin-top:5px; color:#30D158">
+                                Expira en: ${min}:${seg.toString().padStart(2,'0')}
+                            </div>
+                        `;
+                        gridReady.appendChild(card);
                     }
-                } else {
-                    gridPrep.appendChild(card);
+                    // Si restanteS <= 0, simplemente no se añade al grid, pero sigue en la DB
                 }
 
                 // Guardar en memoria para detectar cambios en la siguiente vuelta
