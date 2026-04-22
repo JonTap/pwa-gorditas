@@ -17,7 +17,7 @@
     <audio id="snd" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
-        const URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos";
+        const URL = "https://pwa-4e890-default-rtdb.firebaseio.com/pedidos.json";
         let memoria = {};
         async function sync() {
             const res = await fetch(URL); const data = await res.json() || {};
