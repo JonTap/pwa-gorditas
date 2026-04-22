@@ -54,28 +54,65 @@ function manejarTipoEntrega() {
     document.getElementById('cliente-input-container').style.display = (tipo === "Llevar") ? "block" : "none";
 }
 
+function generarCodigoOrden(longitud) {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let resultado = '';
+    for (let i = 0; i < longitud; i++) {
+        resultado += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return resultado;
+}
+
 // Enviar Pedido a Firebase y WhatsApp
 async function sendOrder() {
-    let txt = "", itemsArr = [];
-    for (let k in cart) { txt += `*${cart[k]}x* ${k}\n`; itemsArr.push(`${cart[k]}x ${k}`); }
+    let txt = "";
+    let itemsArr = [];
+    for (let k in cart) { 
+        txt += `*${cart[k]}x* ${k}\n`; 
+        itemsArr.push(`${cart[k]}x ${k}`); 
+    }
+    
     if (!txt) return alert("Carrito vacío");
 
     const tipo = document.querySelector('input[name="via"]:checked').value;
     const nombre = document.getElementById('clienteNombre').value.trim();
     const idFinal = (tipo === "Llevar") ? (nombre || "Para Llevar") : "Mesa " + mesaFinal;
+    
+    // NUEVO: Generar ID de 10 caracteres y capturar Total
+    const ordenCodigo = generarCodigoOrden(10);
+    const totalVenta = document.getElementById('total-val').innerText;
 
-    const pedidoData = { id: idFinal, tipo, items: itemsArr, timestamp: Date.now(), hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), status: "preparando" };
+    const pedidoData = { 
+        orderId: ordenCodigo, // El ID de 10 caracteres
+        id: idFinal,          // Mesa o Nombre
+        tipo, 
+        items: itemsArr, 
+        total: totalVenta,    // El monto total
+        timestamp: Date.now(), 
+        hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 
+        status: "preparando" 
+    };
 
     try {
-        const res = await fetch(`${CONFIG.FIREBASE_URL}.json`, { method: "POST", body: JSON.stringify(pedidoData) });
+        // CORRECCIÓN DE URL: Asegúrate de usar la URL de la base de datos + .json
+        const res = await fetch(`https://pwa-4e890-default-rtdb.firebaseio.com/pedidos.json`, { 
+            method: "POST", 
+            body: JSON.stringify(pedidoData) 
+        });
         const data = await res.json();
+        
         if(data.name) {
+            // Guardamos el ID interno de Firebase para el tracking
             localStorage.setItem('pedido_activo_id', data.name);
+            // También guardamos el código de 10 caracteres para mostrarlo al cliente
+            localStorage.setItem('orden_codigo_10', ordenCodigo);
             rastrearPedidoPropio();
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Error Firebase:", e); }
 
-    //window.location.href = `https://wa.me/${CONFIG.tel}?text=${encodeURIComponent("*NUEVO PEDIDO*\n" + txt + "\n" + idFinal)}`;
+    // WhatsApp con el código de orden incluido
+    const msgWhatsApp = `*NUEVO PEDIDO* (Orden: ${ordenCodigo})\n------------------\n${txt}------------------\n*Total: ${totalVenta}*\nUbicación: ${idFinal}`;
+    //window.location.href = `https://wa.me/${CONFIG.tel}?text=${encodeURIComponent(msgWhatsApp)}`;
 }
 
 // Rastreo en Tiempo Real para el Cliente
